@@ -52,9 +52,20 @@ export default function ThreeChessKing() {
     const scene = new THREE.Scene();
     
     // Position camera diagonally looking down at the board
-    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-    camera.position.set(6.0, 7.5, 7.5);
-    camera.lookAt(0, -0.4, 0);
+    const aspect = width / height;
+    const isMobileView = width < 768;
+    
+    // Increase FOV and pull camera back/up on mobile so the board fits
+    const fov = isMobileView ? 65 : 50;
+    const camera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 1000);
+    
+    if (isMobileView) {
+      camera.position.set(7.0, 9.5, 8.5);
+      camera.lookAt(0, -1.0, 0); // Look slightly lower on mobile to center it better
+    } else {
+      camera.position.set(6.0, 7.5, 7.5);
+      camera.lookAt(0, -0.4, 0);
+    }
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(width, height);
@@ -744,6 +755,17 @@ export default function ThreeChessKing() {
       if (!containerRef.current) return;
       width = containerRef.current.clientWidth;
       height = containerRef.current.clientHeight;
+      
+      const isMobileNow = width < 768;
+      camera.fov = isMobileNow ? 65 : 50;
+      if (isMobileNow) {
+        camera.position.set(7.0, 9.5, 8.5);
+        camera.lookAt(0, -1.0, 0);
+      } else {
+        camera.position.set(6.0, 7.5, 7.5);
+        camera.lookAt(0, -0.4, 0);
+      }
+      
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
