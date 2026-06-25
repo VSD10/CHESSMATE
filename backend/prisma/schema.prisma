@@ -1,0 +1,153 @@
+// This is your Prisma schema file
+// Run: npx prisma migrate dev --name init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TournamentStatus {
+  UPCOMING
+  OPEN
+  ONGOING
+  COMPLETED
+}
+
+enum TournamentFormat {
+  SWISS
+  ROUND_ROBIN
+  KNOCKOUT
+  BLITZ
+  RAPID
+  CLASSICAL
+}
+
+enum UserRole {
+  ADMIN
+  PLAYER
+}
+
+model Tournament {
+  id            String           @id @default(cuid())
+  slug          String           @unique
+  name          String
+  city          String
+  state         String
+  startDate     DateTime
+  endDate       DateTime
+  format        TournamentFormat
+  rounds        Int
+  timeControl   String
+  category      String
+  fideRated     Boolean          @default(false)
+  entryFee      String
+  prizePool     String
+  status        TournamentStatus @default(UPCOMING)
+  posterUrl     String?
+  emoji         String           @default("♟")
+  about         String           @db.Text
+
+  // Relations
+  detail        TournamentDetail?
+  analytics     AnalyticsEvent[]
+
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([status])
+  @@index([state])
+  @@index([startDate])
+}
+
+model TournamentDetail {
+  id              String   @id @default(cuid())
+  tournamentId    String   @unique
+  tournament      Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  venue           String
+  venueMapUrl     String?
+  chiefArbiter    String
+  organizingCommittee String?
+  organizer       String
+  registrationLink String?
+  resultsLink     String?
+  rules           String?  @db.Text
+  prizes          Json     // Array of {position: string, amount: string}
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model User {
+  id              String        @id @default(cuid())
+  email           String        @unique
+  passwordHash    String?       // Optional — Google OAuth users won't have one
+  name            String
+  role            UserRole      @default(PLAYER)
+  fideId          String?
+  authProvider    String?       // 'google', 'email', etc.
+  authProviderId  String?       // Supabase Auth UID
+
+  profile         PlayerProfile?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([authProviderId])
+}
+
+model PlayerProfile {
+  id              String        @id @default(cuid())
+  userId          String        @unique
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  username        String        @unique
+  playerCode      String        @unique    // Unique ChessMate ID e.g. "CM-847291"
+  currentRating   Int           @default(1500)
+  peakRating      Int           @default(1500)
+  totalTournaments Int          @default(0)
+  winRate         Float         @default(0)
+  avatarUrl       String?
+  bio             String?
+
+  ratingHistory   RatingEntry[]
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model RatingEntry {
+  id              String        @id @default(cuid())
+  profileId       String
+  profile         PlayerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  rating          Int
+  date            DateTime
+  tournamentName  String?
+  delta           Int           @default(0)
+  result          String?       // e.g. "6.5/9"
+
+  createdAt       DateTime      @default(now())
+
+  @@index([profileId])
+  @@index([date])
+}
+
+model AnalyticsEvent {
+  id              String        @id @default(cuid())
+  tournamentId    String
+  tournament      Tournament    @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  type            String        // PAGE_VIEW | REGISTER_CLICK | RESULTS_CLICK
+  userAgent       String?
+  ip              String?
+
+  createdAt       DateTime      @default(now())
+
+  @@index([tournamentId])
+  @@index([type])
+}
