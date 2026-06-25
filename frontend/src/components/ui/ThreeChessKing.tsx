@@ -60,8 +60,8 @@ export default function ThreeChessKing() {
     const camera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 1000);
     
     if (isMobileView) {
-      camera.position.set(7.0, 9.5, 8.5);
-      camera.lookAt(0, -1.0, 0); // Look slightly lower on mobile to center it better
+      camera.position.set(5.5, 6.0, 8.5);
+      camera.lookAt(0, 0.2, 0); // Look slightly higher to push the board up
     } else {
       camera.position.set(6.0, 7.5, 7.5);
       camera.lookAt(0, -0.4, 0);
@@ -759,8 +759,8 @@ export default function ThreeChessKing() {
       const isMobileNow = width < 768;
       camera.fov = isMobileNow ? 65 : 50;
       if (isMobileNow) {
-        camera.position.set(7.0, 9.5, 8.5);
-        camera.lookAt(0, -1.0, 0);
+        camera.position.set(5.5, 6.0, 8.5);
+        camera.lookAt(0, 0.2, 0);
       } else {
         camera.position.set(6.0, 7.5, 7.5);
         camera.lookAt(0, -0.4, 0);
