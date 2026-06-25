@@ -28,16 +28,7 @@ export default function ThreeChessKing() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  useEffect(() => {
-    if (isMobile || !containerRef.current) return;
+    if (!containerRef.current) return;
 
     const container = containerRef.current;
     let width = container.clientWidth || 600;
@@ -779,34 +770,6 @@ export default function ThreeChessKing() {
     };
   }, [isMobile]);
 
-  if (isMobile) {
-    return (
-      <div className="w-full h-[320px] sm:h-[400px] flex items-center justify-center relative select-none pointer-events-none">
-        <div className="absolute w-60 h-60 rounded-full bg-primary-container/10 filter blur-3xl animate-pulse-slow" />
-        <div className="relative animate-float flex flex-col items-center">
-          <svg 
-            className="w-36 h-36 sm:w-44 sm:h-44 text-primary drop-shadow-[0_0_20px_rgba(128,131,255,0.4)]" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="1" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-          >
-            <path d="M19 21H5" />
-            <path d="M5 21v-2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v2" />
-            <path d="M18 14H6" />
-            <path d="M12 4V2" />
-            <path d="M10 3h4" />
-            <path d="m18 14-1.25-5.02a1.5 1.5 0 0 0-2.31-.9l-2.44 1.63-2.44-1.63a1.5 1.5 0 0 0-2.31.9L6 14" />
-          </svg>
-          <div className="mt-4 text-center">
-            <span className="font-label-sm text-primary/60 uppercase tracking-widest text-xs">ChessMate Engine Active</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div ref={containerRef} className="w-full h-full bg-transparent min-h-[600px] cursor-pointer" />
